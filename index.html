@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>ASUN</title>
+    <style>
+        body { font-family: Arial, sans-serif; }
+        .container { width: 300px; margin: 50px auto; }
+        .form-group { margin: 10px 0; }
+        button { margin: 5px; }
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+    <!-- Initial Login Screen -->
+    <div class="container" id="loginScreen">
+        <h1>ASUN</h1>
+        <div id="authForms">
+            <div class="form-group">
+                <input type="text" id="username" placeholder="Username">
+            </div>
+            <div class="form-group">
+                <input type="password" id="password" placeholder="Password">
+            </div>
+            <button onclick="handleLogin()">Login</button>
+            <button onclick="showSignup()">Sign Up</button>
+            <button onclick="handleAdminLogin()">Admin Login</button>
+        </div>
+
+        <div id="signupForm" class="hidden">
+            <div class="form-group">
+                <input type="text" id="newUsername" placeholder="Username">
+            </div>
+            <div class="form-group">
+                <input type="password" id="newPassword" placeholder="Password">
+            </div>
+            <button onclick="handleSignup()">Create Account</button>
+            <button onclick="showLogin()">Back to Login</button>
+        </div>
+    </div>
+
+    <!-- User Dashboard -->
+    <div class="container hidden" id="userDashboard">
+        <h2>Welcome, <span id="displayName"></span>!</h2>
+        <button onclick="showNews()">News & Updates</button>
+        <button onclick="showCoupons()">Coupon Codes</button>
+        <button onclick="showStore()">Store Section</button>
+        <button onclick="showProfile()">Manage Profile</button>
+        <button onclick="logout()">Logout</button>
+    </div>
+
+    <!-- Admin Dashboard -->
+    <div class="container hidden" id="adminDashboard">
+        <h2>Admin Panel</h2>
+        <button onclick="manageNews()">Manage News</button>
+        <button onclick="manageCoupons()">Manage Coupons</button>
+        <button onclick="manageStore()">Manage Store</button>
+        <button onclick="logout()">Logout</button>
+    </div>
+
+    <!-- Profile Management -->
+    <div class="container hidden" id="profileManagement">
+        <h3>Profile Settings</h3>
+        <input type="text" id="nickname" placeholder="New Nickname">
+        <input type="url" id="avatar" placeholder="Avatar URL">
+        <button onclick="updateProfile()">Update Profile</button>
+        <p>Loyalty Points: <span id="loyaltyPoints">0</span></p>
+        <button onclick="showDashboard()">Back</button>
+    </div>
+
+    <!-- Store Section -->
+    <div class="container hidden" id="storeSection">
+        <h3>Store</h3>
+        <div id="storeItems"></div>
+        <button onclick="showDashboard()">Back</button>
+    </div>
+
+    <script>
+        // Initialize localStorage
+        if (!localStorage.getItem('ASUN_users')) {
+            localStorage.setItem('ASUN_users', JSON.stringify([]));
+        }
+        if (!localStorage.getItem('ASUN_admin')) {
+            localStorage.setItem('ASUN_admin', JSON.stringify({
+                username: 'admin',
+                password: 'admin123'
+            }));
+        }
+        if (!localStorage.getItem('ASUN_store')) {
+            localStorage.setItem('ASUN_store', JSON.stringify([
+                { id: 1, name: 'Item 1', price: 100 },
+                { id: 2, name: 'Item 2', price: 200 }
+            ]));
+        }
+
+        let currentUser = null;
+
+        function handleLogin() {
+            const users = JSON.parse(localStorage.getItem('ASUN_users'));
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            
+            const user = users.find(u => u.username === username && u.password === password);
+            if (user) {
+                currentUser = user;
+                showDashboard();
+            } else {
+                alert('Invalid credentials');
+            }
+        }
+
+        function handleAdminLogin() {
+            const admin = JSON.parse(localStorage.getItem('ASUN_admin'));
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            
+            if (username === admin.username && password === admin.password) {
+                document.getElementById('loginScreen').classList.add('hidden');
+                document.getElementById('adminDashboard').classList.remove('hidden');
+            } else {
+                alert('Invalid admin credentials');
+            }
+        }
+
+        function showSignup() {
+            document.getElementById('authForms').classList.add('hidden');
+            document.getElementById('signupForm').classList.remove('hidden');
+        }
+
+        function handleSignup() {
+            const users = JSON.parse(localStorage.getItem('ASUN_users'));
+            const newUser = {
+                username: document.getElementById('newUsername').value,
+                password: document.getElementById('newPassword').value,
+                nickname: '',
+                avatar: '',
+                points: 0
+            };
+            
+            users.push(newUser);
+            localStorage.setItem('ASUN_users', JSON.stringify(users));
+            showLogin();
+        }
+
+        function showDashboard() {
+            document.getElementById('loginScreen').classList.add('hidden');
+            document.getElementById('userDashboard').classList.remove('hidden');
+            document.getElementById('displayName').textContent = currentUser.nickname || currentUser.username;
+        }
+
+        function showProfile() {
+            document.getElementById('userDashboard').classList.add('hidden');
+            document.getElementById('profileManagement').classList.remove('hidden');
+            document.getElementById('nickname').value = currentUser.nickname;
+            document.getElementById('avatar').value = currentUser.avatar;
+            document.getElementById('loyaltyPoints').textContent = currentUser.points;
+        }
+
+        function updateProfile() {
+            const users = JSON.parse(localStorage.getItem('ASUN_users'));
+            const userIndex = users.findIndex(u => u.username === currentUser.username);
+            
+            users[userIndex].nickname = document.getElementById('nickname').value;
+            users[userIndex].avatar = document.getElementById('avatar').value;
+            
+            localStorage.setItem('ASUN_users', JSON.stringify(users));
+            currentUser = users[userIndex];
+            showDashboard();
+        }
+
+        function logout() {
+            currentUser = null;
+            location.reload();
+        }
+
+        // Add similar functions for store, news, and admin features
+    </script>
+</body>
+</html>
