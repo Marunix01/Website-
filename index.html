@@ -158,43 +158,53 @@
     </div>
 
     <script>
-        // Initialize LocalStorage
-        function initStorage() {
-            if (!localStorage.ASUN_users) {
+        // ========== SYSTEM INITIALIZATION ========== //
+        const SYSTEM_VERSION = 3;
+        const ADMIN_CREDENTIALS = {
+            username: 'admin',
+            password: 'GameMaster123!',
+            isAdmin: true
+        };
+
+        function initializeSystem() {
+            if (!localStorage.ASUN_version || localStorage.ASUN_version < SYSTEM_VERSION) {
+                localStorage.clear();
+                localStorage.ASUN_version = SYSTEM_VERSION;
                 localStorage.ASUN_users = JSON.stringify([]);
-            }
-            if (!localStorage.ASUN_admin) {
-                localStorage.ASUN_admin = JSON.stringify({
-                    username: 'admin',
-                    password: 'GameMaster123!',
-                    isAdmin: true
-                });
-            }
-            if (!localStorage.ASUN_store) {
+                localStorage.ASUN_admin = JSON.stringify(ADMIN_CREDENTIALS);
                 localStorage.ASUN_store = JSON.stringify([
                     { id: 1, name: 'Power Boost', price: 150 },
                     { id: 2, name: 'Special Skin', price: 200 }
                 ]);
-            }
-            if (!localStorage.ASUN_news) {
                 localStorage.ASUN_news = JSON.stringify([
                     { id: 1, content: "Welcome to ASUN Gaming Hub!", date: new Date().toLocaleDateString() }
                 ]);
-            }
-            if (!localStorage.ASUN_coupons) {
                 localStorage.ASUN_coupons = JSON.stringify([]);
             }
         }
 
+        // ========== AUTHENTICATION ========== //
         let currentUser = null;
-        initStorage();
 
-        // Authentication Functions
+        function handleAdminLogin() {
+            const storedAdmin = JSON.parse(localStorage.ASUN_admin);
+            const inputUser = document.getElementById('username').value.trim();
+            const inputPass = document.getElementById('password').value;
+
+            if (inputUser === storedAdmin.username && inputPass === storedAdmin.password) {
+                currentUser = storedAdmin;
+                showDashboard();
+                console.log('Admin login successful');
+            } else {
+                alert(`🔒 Invalid Admin Credentials!\n\nUse:\nUsername: ${storedAdmin.username}\nPassword: ${storedAdmin.password}`);
+            }
+        }
+
         function handleUserLogin() {
             const users = JSON.parse(localStorage.ASUN_users);
-            const username = document.getElementById('username').value;
+            const username = document.getElementById('username').value.trim();
             const password = document.getElementById('password').value;
-            
+
             const user = users.find(u => u.username === username && u.password === password);
             if (user) {
                 currentUser = user;
@@ -205,45 +215,31 @@
             }
         }
 
-        function handleAdminLogin() {
-            const admin = JSON.parse(localStorage.ASUN_admin);
-            const username = document.getElementById('username').value;
-            const password = document.getElementById('password').value;
-
-            if (username === admin.username && password === admin.password) {
-                currentUser = admin;
-                document.querySelectorAll('.container').forEach(c => c.classList.add('hidden'));
-                document.getElementById('adminDashboard').classList.remove('hidden');
-            } else {
-                alert('⚠️ Invalid Admin Credentials!\nUse: admin / GameMaster123!');
-            }
-        }
-
         function handleSignup() {
             const users = JSON.parse(localStorage.ASUN_users);
             const newUser = {
-                username: document.getElementById('newUsername').value,
+                username: document.getElementById('newUsername').value.trim(),
                 password: document.getElementById('newPassword').value,
                 nickname: '',
                 avatar: '',
                 points: 0
             };
-            
+
             if (users.some(u => u.username === newUser.username)) {
                 alert('Username already exists!');
                 return;
             }
-            
+
             users.push(newUser);
             localStorage.ASUN_users = JSON.stringify(users);
             currentUser = newUser;
             showDashboard();
         }
 
-        // Navigation Functions
+        // ========== NAVIGATION ========== //
         function showDashboard() {
             document.querySelectorAll('.container').forEach(c => c.classList.add('hidden'));
-            if (currentUser && currentUser.isAdmin) {
+            if (currentUser?.isAdmin) {
                 document.getElementById('adminDashboard').classList.remove('hidden');
             } else if (currentUser) {
                 document.getElementById('userDashboard').classList.remove('hidden');
@@ -257,7 +253,7 @@
             if (section === 'news') loadNews();
         }
 
-        // Store Functions
+        // ========== STORE SYSTEM ========== //
         function loadStore() {
             const store = JSON.parse(localStorage.ASUN_store);
             const storeDiv = document.getElementById('storeItems');
@@ -275,18 +271,16 @@
             const users = JSON.parse(localStorage.ASUN_users);
             const userIndex = users.findIndex(u => u.username === currentUser.username);
             
-            let points = 0;
-            if (item.price >= 95 && item.price <= 250) points = 5;
-            if (item.price > 250) points = 10;
-            
+            let points = item.price <= 250 ? 5 : 10;
             users[userIndex].points = (users[userIndex].points || 0) + points;
+            
             localStorage.ASUN_users = JSON.stringify(users);
             currentUser = users[userIndex];
-            alert(`✅ Purchase Successful!\n+${points} Loyalty Points!`);
+            alert(`✅ Purchased ${item.name}!\n+${points} Loyalty Points!`);
             showSection('profile');
         }
 
-        // Admin Functions
+        // ========== ADMIN FEATURES ========== //
         function manageContent(type) {
             document.querySelectorAll('.container').forEach(c => c.classList.add('hidden'));
             document.getElementById(`manage${type.charAt(0).toUpperCase() + type.slice(1)}`).classList.remove('hidden');
@@ -297,8 +291,8 @@
             const content = prompt('Enter news content:');
             if (content) {
                 const news = JSON.parse(localStorage.ASUN_news);
-                news.push({ 
-                    id: Date.now(), 
+                news.push({
+                    id: Date.now(),
                     content,
                     date: new Date().toLocaleDateString()
                 });
@@ -307,7 +301,7 @@
             }
         }
 
-        // Utility Functions
+        // ========== UTILITIES ========== //
         function logout() {
             currentUser = null;
             location.reload();
@@ -323,8 +317,8 @@
             document.getElementById('signupForm').classList.add('hidden');
         }
 
-        // Initialization
-        initStorage();
+        // ========== INITIALIZE ========== //
+        initializeSystem();
     </script>
 </body>
 </html>
