@@ -4,13 +4,13 @@
     <meta charset="UTF-8">
     <title>ASUN Gaming Hub</title>
     <style>
+        /* Base Styles */
         body {
             font-family: 'Arial Black', sans-serif;
             background: #0a0a1a;
             color: #0ff;
             margin: 0;
             padding: 20px;
-            background-image: radial-gradient(circle at center, #001 0%, #003 100%);
         }
         .container {
             background: rgba(0, 20, 40, 0.9);
@@ -45,7 +45,7 @@
             box-shadow: 0 0 20px #0ff;
             transform: scale(1.05);
         }
-        input {
+        input, textarea {
             background: #002;
             border: 2px solid #0ff;
             color: #0ff;
@@ -61,21 +61,37 @@
             grid-template-columns: repeat(2, 1fr);
             gap: 15px;
         }
-        .store-item {
+        .item-card {
             background: #001;
             padding: 20px;
             border-radius: 10px;
             border: 1px solid #0ff;
             box-shadow: 0 0 10px #0ff4;
+            margin: 10px 0;
         }
         .admin-panel {
             border-color: #f0f;
             box-shadow: 0 0 30px #f0f4;
         }
+        .management-section {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        .preview-image {
+            max-width: 200px;
+            max-height: 150px;
+            margin: 10px 0;
+            border-radius: 8px;
+        }
+        .delete-btn {
+            background: #500 !important;
+            border-color: #f00 !important;
+        }
     </style>
 </head>
 <body>
-    <!-- Login Screen -->
+    <!-- Authentication Section -->
     <div class="container" id="loginScreen">
         <h1>🎮 ASUN GAMING HUB</h1>
         <div id="authForms">
@@ -114,29 +130,63 @@
     <div class="container admin-panel hidden" id="adminDashboard">
         <h2>⚙️ ADMIN PANEL</h2>
         <div class="grid">
-            <button onclick="manageContent('news')" style="border-color: #f0f;">📰 Manage News</button>
-            <button onclick="manageContent('coupons')" style="border-color: #f0f;">🎫 Manage Coupons</button>
-            <button onclick="manageContent('store')" style="border-color: #f0f;">🛒 Manage Store</button>
-            <button onclick="logout()" style="grid-column: span 2; border-color: #f0f;">🚪 Logout</button>
+            <button onclick="manageContent('news')">📰 Manage News</button>
+            <button onclick="manageContent('coupons')">🎫 Manage Coupons</button>
+            <button onclick="manageContent('store')">🛒 Manage Store</button>
+            <button onclick="logout()" style="grid-column: span 2;">🚪 Logout</button>
         </div>
     </div>
 
-    <!-- Content Sections -->
+    <!-- Management Sections -->
+    <div class="container admin-panel hidden" id="manageNews">
+        <h3>📰 News Management</h3>
+        <div class="management-section">
+            <textarea id="newsContent" placeholder="News content"></textarea>
+            <input type="file" id="newsImage" accept="image/*">
+            <button onclick="createNews()">➕ Add News</button>
+            <div id="newsList"></div>
+        </div>
+        <button onclick="showAdminDashboard()">🔙 Back</button>
+    </div>
+
+    <div class="container admin-panel hidden" id="manageStore">
+        <h3>🛒 Store Management</h3>
+        <div class="management-section">
+            <input type="text" id="itemName" placeholder="Item name">
+            <input type="number" id="itemPrice" placeholder="Price (NPR)">
+            <button onclick="addStoreItem()">➕ Add Item</button>
+            <div id="storeList"></div>
+        </div>
+        <button onclick="showAdminDashboard()">🔙 Back</button>
+    </div>
+
+    <div class="container admin-panel hidden" id="manageCoupons">
+        <h3>🎫 Coupon Management</h3>
+        <div class="management-section">
+            <input type="text" id="couponCode" placeholder="Coupon code">
+            <input type="number" id="couponValue" placeholder="Discount (%)">
+            <button onclick="addCoupon()">➕ Add Coupon</button>
+            <div id="couponList"></div>
+        </div>
+        <button onclick="showAdminDashboard()">🔙 Back</button>
+    </div>
+
+    <!-- User Sections -->
     <div class="container hidden" id="newsSection">
         <h3>📰 Latest News</h3>
-        <div id="newsContent"></div>
+        <div id="newsDisplay"></div>
         <button onclick="showDashboard()">🔙 Back</button>
     </div>
 
     <div class="container hidden" id="couponsSection">
         <h3>🎫 Active Coupons</h3>
-        <div id="couponsContent"></div>
+        <div id="couponsDisplay"></div>
         <button onclick="showDashboard()">🔙 Back</button>
     </div>
 
     <div class="container hidden" id="storeSection">
         <h3>🛒 Game Store</h3>
-        <div id="storeItems" class="grid"></div>
+        <div id="storeDisplay" class="grid"></div>
         <button onclick="showDashboard()">🔙 Back</button>
     </div>
 
@@ -149,54 +199,42 @@
         <button onclick="showDashboard()">🔙 Back</button>
     </div>
 
-    <!-- Admin Management Sections -->
-    <div class="container admin-panel hidden" id="manageNews">
-        <h3>📰 Manage News</h3>
-        <button onclick="addNews()" style="border-color: #f0f;">➕ Add News</button>
-        <div id="newsList"></div>
-        <button onclick="showAdminDashboard()" style="border-color: #f0f;">🔙 Back</button>
-    </div>
-
     <script>
-        // ========== SYSTEM INITIALIZATION ========== //
-        const SYSTEM_VERSION = 3;
+        // System Configuration
+        const SYSTEM_VERSION = 5;
         const ADMIN_CREDENTIALS = {
             username: 'admin',
             password: 'GameMaster123!',
             isAdmin: true
         };
 
+        // System Initialization
         function initializeSystem() {
             if (!localStorage.ASUN_version || localStorage.ASUN_version < SYSTEM_VERSION) {
                 localStorage.clear();
                 localStorage.ASUN_version = SYSTEM_VERSION;
                 localStorage.ASUN_users = JSON.stringify([]);
                 localStorage.ASUN_admin = JSON.stringify(ADMIN_CREDENTIALS);
-                localStorage.ASUN_store = JSON.stringify([
-                    { id: 1, name: 'Power Boost', price: 150 },
-                    { id: 2, name: 'Special Skin', price: 200 }
-                ]);
-                localStorage.ASUN_news = JSON.stringify([
-                    { id: 1, content: "Welcome to ASUN Gaming Hub!", date: new Date().toLocaleDateString() }
-                ]);
+                localStorage.ASUN_store = JSON.stringify([]);
+                localStorage.ASUN_news = JSON.stringify([]);
                 localStorage.ASUN_coupons = JSON.stringify([]);
             }
         }
 
-        // ========== AUTHENTICATION ========== //
         let currentUser = null;
+        initializeSystem();
 
+        // Authentication Functions
         function handleAdminLogin() {
             const storedAdmin = JSON.parse(localStorage.ASUN_admin);
-            const inputUser = document.getElementById('username').value.trim();
-            const inputPass = document.getElementById('password').value;
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value;
 
-            if (inputUser === storedAdmin.username && inputPass === storedAdmin.password) {
+            if (username === storedAdmin.username && password === storedAdmin.password) {
                 currentUser = storedAdmin;
-                showDashboard();
-                console.log('Admin login successful');
+                showAdminDashboard();
             } else {
-                alert(`🔒 Invalid Admin Credentials!\n\nUse:\nUsername: ${storedAdmin.username}\nPassword: ${storedAdmin.password}`);
+                alert('⚠️ Invalid admin credentials!');
             }
         }
 
@@ -209,9 +247,8 @@
             if (user) {
                 currentUser = user;
                 showDashboard();
-                document.getElementById('displayName').textContent = user.nickname || user.username;
             } else {
-                alert('🔐 Invalid Player Credentials!');
+                alert('🔐 Invalid credentials!');
             }
         }
 
@@ -236,89 +273,6 @@
             showDashboard();
         }
 
-        // ========== NAVIGATION ========== //
-        function showDashboard() {
-            document.querySelectorAll('.container').forEach(c => c.classList.add('hidden'));
-            if (currentUser?.isAdmin) {
-                document.getElementById('adminDashboard').classList.remove('hidden');
-            } else if (currentUser) {
-                document.getElementById('userDashboard').classList.remove('hidden');
-            }
-        }
-
-        function showSection(section) {
-            document.querySelectorAll('.container').forEach(c => c.classList.add('hidden'));
-            document.getElementById(`${section}Section`).classList.remove('hidden');
-            if (section === 'store') loadStore();
-            if (section === 'news') loadNews();
-        }
-
-        // ========== STORE SYSTEM ========== //
-        function loadStore() {
-            const store = JSON.parse(localStorage.ASUN_store);
-            const storeDiv = document.getElementById('storeItems');
-            storeDiv.innerHTML = store.map(item => `
-                <div class="store-item">
-                    <h4>${item.name}</h4>
-                    <p>💰 ${item.price} NPR</p>
-                    <button onclick="buyItem(${item.id})">PURCHASE</button>
-                </div>
-            `).join('');
-        }
-
-        function buyItem(itemId) {
-            const item = JSON.parse(localStorage.ASUN_store).find(i => i.id === itemId);
-            const users = JSON.parse(localStorage.ASUN_users);
-            const userIndex = users.findIndex(u => u.username === currentUser.username);
-            
-            let points = item.price <= 250 ? 5 : 10;
-            users[userIndex].points = (users[userIndex].points || 0) + points;
-            
-            localStorage.ASUN_users = JSON.stringify(users);
-            currentUser = users[userIndex];
-            alert(`✅ Purchased ${item.name}!\n+${points} Loyalty Points!`);
-            showSection('profile');
-        }
-
-        // ========== ADMIN FEATURES ========== //
-        function manageContent(type) {
-            document.querySelectorAll('.container').forEach(c => c.classList.add('hidden'));
-            document.getElementById(`manage${type.charAt(0).toUpperCase() + type.slice(1)}`).classList.remove('hidden');
-            if (type === 'news') loadNewsManagement();
-        }
-
-        function addNews() {
-            const content = prompt('Enter news content:');
-            if (content) {
-                const news = JSON.parse(localStorage.ASUN_news);
-                news.push({
-                    id: Date.now(),
-                    content,
-                    date: new Date().toLocaleDateString()
-                });
-                localStorage.ASUN_news = JSON.stringify(news);
-                loadNewsManagement();
-            }
-        }
-
-        // ========== UTILITIES ========== //
-        function logout() {
-            currentUser = null;
-            location.reload();
-        }
-
-        function showSignup() {
-            document.getElementById('authForms').classList.add('hidden');
-            document.getElementById('signupForm').classList.remove('hidden');
-        }
-
-        function showLogin() {
-            document.getElementById('authForms').classList.remove('hidden');
-            document.getElementById('signupForm').classList.add('hidden');
-        }
-
-        // ========== INITIALIZE ========== //
-        initializeSystem();
-    </script>
-</body>
-</html>
+        // Store Management
+        function addStoreItem() {
+            const name = document.getElementById('itemName').value;
