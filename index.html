@@ -1,278 +1,125 @@
-<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html><html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>ASUN Gaming Hub</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Online Store</title>
     <style>
-        /* Base Styles */
         body {
-            font-family: 'Arial Black', sans-serif;
-            background: #0a0a1a;
-            color: #0ff;
-            margin: 0;
-            padding: 20px;
-        }
-        .container {
-            background: rgba(0, 20, 40, 0.9);
-            border: 2px solid #0ff;
-            border-radius: 15px;
-            padding: 20px;
-            max-width: 600px;
-            margin: 20px auto;
-            box-shadow: 0 0 30px #0ff4;
-        }
-        h1, h2, h3 {
-            color: #0ff;
+            font-family: Arial, sans-serif;
             text-align: center;
-            text-shadow: 0 0 15px #0ff;
-            margin: 10px 0;
         }
-        button {
-            background: #002;
-            color: #0ff;
-            border: 2px solid #0ff;
-            padding: 12px 24px;
-            margin: 10px;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.3s;
-            font-size: 16px;
-            font-weight: bold;
-        }
-        button:hover {
-            background: #0ff;
-            color: #002;
-            box-shadow: 0 0 20px #0ff;
-            transform: scale(1.05);
-        }
-        input, textarea {
-            background: #002;
-            border: 2px solid #0ff;
-            color: #0ff;
-            padding: 12px;
-            margin: 8px 0;
-            border-radius: 8px;
-            width: 94%;
-            font-size: 16px;
-        }
-        .hidden { display: none; }
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 15px;
-        }
-        .item-card {
-            background: #001;
-            padding: 20px;
-            border-radius: 10px;
-            border: 1px solid #0ff;
-            box-shadow: 0 0 10px #0ff4;
-            margin: 10px 0;
-        }
-        .admin-panel {
-            border-color: #f0f;
-            box-shadow: 0 0 30px #f0f4;
-        }
-        .management-section {
+        .nav {
             display: flex;
-            flex-direction: column;
-            gap: 15px;
+            justify-content: space-between;
+            padding: 10px;
+            background: #333;
+            color: white;
         }
-        .preview-image {
-            max-width: 200px;
-            max-height: 150px;
-            margin: 10px 0;
-            border-radius: 8px;
+        .nav a {
+            color: white;
+            margin: 0 10px;
+            text-decoration: none;
         }
-        .delete-btn {
-            background: #500 !important;
-            border-color: #f00 !important;
+        .sections {
+            display: flex;
+            justify-content: center;
+            margin: 20px;
+        }
+        .section {
+            margin: 10px;
+            padding: 20px;
+            border: 1px solid #000;
+            cursor: pointer;
+        }
+        .store {
+            margin-top: 20px;
+        }
+        .item {
+            margin: 10px;
+            padding: 10px;
+            border: 1px solid black;
+        }
+        .out-of-stock {
+            color: red;
         }
     </style>
 </head>
 <body>
-    <!-- Authentication Section -->
-    <div class="container" id="loginScreen">
-        <h1>🎮 ASUN GAMING HUB</h1>
-        <div id="authForms">
-            <input type="text" id="username" placeholder="Username" autocomplete="off">
-            <input type="password" id="password" placeholder="Password" autocomplete="off">
-            <div class="grid">
-                <button onclick="handleUserLogin()">Player Login</button>
-                <button onclick="showSignup()">New Player</button>
-                <button onclick="handleAdminLogin()" style="background: #202; border-color: #f0f;">Admin Login</button>
-            </div>
+    <div class="nav">
+        <div>
+            <a href="#">Login</a>
+            <a href="#">Sign Up</a>
         </div>
-
-        <div id="signupForm" class="hidden">
-            <input type="text" id="newUsername" placeholder="Username" autocomplete="off">
-            <input type="password" id="newPassword" placeholder="Password" autocomplete="off">
-            <div class="grid">
-                <button onclick="handleSignup()">Create Account</button>
-                <button onclick="showLogin()">Back</button>
-            </div>
+        <div>
+            <a href="#" onclick="showAdminPanel()">Admin Panel</a>
         </div>
     </div>
-
-    <!-- User Dashboard -->
-    <div class="container hidden" id="userDashboard">
-        <h2>🕹️ Welcome, <span id="displayName"></span>!</h2>
-        <div class="grid">
-            <button onclick="showSection('news')">📰 News</button>
-            <button onclick="showSection('coupons')">🎫 Coupons</button>
-            <button onclick="showSection('store')">🛒 Store</button>
-            <button onclick="showSection('profile')">👤 Profile</button>
-            <button onclick="logout()" style="grid-column: span 2;">🚪 Logout</button>
-        </div>
+    <div class="sections">
+        <div class="section" onclick="openSection('electronics')">Electronics</div>
+        <div class="section" onclick="openSection('clothing')">Clothing</div>
+        <div class="section" onclick="openSection('groceries')">Groceries</div>
+        <div class="section" onclick="openSection('books')">Books</div>
+        <div class="section" onclick="openSection('home_appliances')">Home Appliances</div>
     </div>
+    <button onclick="goHome()">Back to Home</button><div id="store" class="store"></div>
 
-    <!-- Admin Dashboard -->
-    <div class="container admin-panel hidden" id="adminDashboard">
-        <h2>⚙️ ADMIN PANEL</h2>
-        <div class="grid">
-            <button onclick="manageContent('news')">📰 Manage News</button>
-            <button onclick="manageContent('coupons')">🎫 Manage Coupons</button>
-            <button onclick="manageContent('store')">🛒 Manage Store</button>
-            <button onclick="logout()" style="grid-column: span 2;">🚪 Logout</button>
-        </div>
-    </div>
-
-    <!-- Management Sections -->
-    <div class="container admin-panel hidden" id="manageNews">
-        <h3>📰 News Management</h3>
-        <div class="management-section">
-            <textarea id="newsContent" placeholder="News content"></textarea>
-            <input type="file" id="newsImage" accept="image/*">
-            <button onclick="createNews()">➕ Add News</button>
-            <div id="newsList"></div>
-        </div>
-        <button onclick="showAdminDashboard()">🔙 Back</button>
-    </div>
-
-    <div class="container admin-panel hidden" id="manageStore">
-        <h3>🛒 Store Management</h3>
-        <div class="management-section">
-            <input type="text" id="itemName" placeholder="Item name">
-            <input type="number" id="itemPrice" placeholder="Price (NPR)">
-            <button onclick="addStoreItem()">➕ Add Item</button>
-            <div id="storeList"></div>
-        </div>
-        <button onclick="showAdminDashboard()">🔙 Back</button>
-    </div>
-
-    <div class="container admin-panel hidden" id="manageCoupons">
-        <h3>🎫 Coupon Management</h3>
-        <div class="management-section">
-            <input type="text" id="couponCode" placeholder="Coupon code">
-            <input type="number" id="couponValue" placeholder="Discount (%)">
-            <button onclick="addCoupon()">➕ Add Coupon</button>
-            <div id="couponList"></div>
-        </div>
-        <button onclick="showAdminDashboard()">🔙 Back</button>
-    </div>
-
-    <!-- User Sections -->
-    <div class="container hidden" id="newsSection">
-        <h3>📰 Latest News</h3>
-        <div id="newsDisplay"></div>
-        <button onclick="showDashboard()">🔙 Back</button>
-    </div>
-
-    <div class="container hidden" id="couponsSection">
-        <h3>🎫 Active Coupons</h3>
-        <div id="couponsDisplay"></div>
-        <button onclick="showDashboard()">🔙 Back</button>
-    </div>
-
-    <div class="container hidden" id="storeSection">
-        <h3>🛒 Game Store</h3>
-        <div id="storeDisplay" class="grid"></div>
-        <button onclick="showDashboard()">🔙 Back</button>
-    </div>
-
-    <div class="container hidden" id="profileSection">
-        <h3>👤 Player Profile</h3>
-        <input type="text" id="nickname" placeholder="Nickname">
-        <input type="url" id="avatar" placeholder="Avatar URL">
-        <p>🏆 Loyalty Points: <span id="loyaltyPoints">0</span></p>
-        <button onclick="updateProfile()">💾 Save</button>
-        <button onclick="showDashboard()">🔙 Back</button>
-    </div>
-
-    <script>
-        // System Configuration
-        const SYSTEM_VERSION = 5;
-        const ADMIN_CREDENTIALS = {
-            username: 'admin',
-            password: 'GameMaster123!',
-            isAdmin: true
-        };
-
-        // System Initialization
-        function initializeSystem() {
-            if (!localStorage.ASUN_version || localStorage.ASUN_version < SYSTEM_VERSION) {
-                localStorage.clear();
-                localStorage.ASUN_version = SYSTEM_VERSION;
-                localStorage.ASUN_users = JSON.stringify([]);
-                localStorage.ASUN_admin = JSON.stringify(ADMIN_CREDENTIALS);
-                localStorage.ASUN_store = JSON.stringify([]);
-                localStorage.ASUN_news = JSON.stringify([]);
-                localStorage.ASUN_coupons = JSON.stringify([]);
+<script>
+    let items = [
+        { name: "Laptop", category: "electronics", stock: 3 },
+        { name: "Shirt", category: "clothing", stock: 5 },
+        { name: "Rice", category: "groceries", stock: 2 },
+        { name: "Book", category: "books", stock: 4 },
+        { name: "Microwave", category: "home_appliances", stock: 1 }
+    ];
+    
+    function openSection(category) {
+        let storeDiv = document.getElementById("store");
+        storeDiv.innerHTML = "<h2>" + category + "</h2>";
+        items.forEach((item, index) => {
+            if (item.category === category) {
+                storeDiv.innerHTML += `
+                    <div class="item">
+                        <p>${item.name} - ${item.stock > 0 ? item.stock + ' available' : '<span class="out-of-stock">Out of Stock</span>'}</p>
+                        <button onclick="buyItem(${index})">Buy</button>
+                    </div>`;
             }
+        });
+    }
+    
+    function buyItem(index) {
+        if (items[index].stock > 0) {
+            items[index].stock--;
+            openSection(items[index].category);
         }
+    }
+    
+    function goHome() {
+        document.getElementById("store").innerHTML = "";
+    }
+    
+    function showAdminPanel() {
+        let storeDiv = document.getElementById("store");
+        storeDiv.innerHTML = "<h2>Admin Panel</h2>";
+        items.forEach((item, index) => {
+            storeDiv.innerHTML += `
+                <div class="item">
+                    <p>${item.name} - ${item.stock > 0 ? item.stock + ' available' : '<span class="out-of-stock">Out of Stock</span>'}</p>
+                    <button onclick="restockItem(${index})">Restock</button>
+                    <button onclick="deleteItem(${index})">Delete</button>
+                </div>`;
+        });
+    }
+    
+    function restockItem(index) {
+        items[index].stock = 5;
+        showAdminPanel();
+    }
+    
+    function deleteItem(index) {
+        items.splice(index, 1);
+        showAdminPanel();
+    }
+</script>
 
-        let currentUser = null;
-        initializeSystem();
-
-        // Authentication Functions
-        function handleAdminLogin() {
-            const storedAdmin = JSON.parse(localStorage.ASUN_admin);
-            const username = document.getElementById('username').value.trim();
-            const password = document.getElementById('password').value;
-
-            if (username === storedAdmin.username && password === storedAdmin.password) {
-                currentUser = storedAdmin;
-                showAdminDashboard();
-            } else {
-                alert('⚠️ Invalid admin credentials!');
-            }
-        }
-
-        function handleUserLogin() {
-            const users = JSON.parse(localStorage.ASUN_users);
-            const username = document.getElementById('username').value.trim();
-            const password = document.getElementById('password').value;
-
-            const user = users.find(u => u.username === username && u.password === password);
-            if (user) {
-                currentUser = user;
-                showDashboard();
-            } else {
-                alert('🔐 Invalid credentials!');
-            }
-        }
-
-        function handleSignup() {
-            const users = JSON.parse(localStorage.ASUN_users);
-            const newUser = {
-                username: document.getElementById('newUsername').value.trim(),
-                password: document.getElementById('newPassword').value,
-                nickname: '',
-                avatar: '',
-                points: 0
-            };
-
-            if (users.some(u => u.username === newUser.username)) {
-                alert('Username already exists!');
-                return;
-            }
-
-            users.push(newUser);
-            localStorage.ASUN_users = JSON.stringify(users);
-            currentUser = newUser;
-            showDashboard();
-        }
-
-        // Store Management
-        function addStoreItem() {
-            const name = document.getElementById('itemName').value;
+</body>
+</html>
