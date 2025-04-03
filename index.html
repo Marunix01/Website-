@@ -41,7 +41,7 @@
         }
     </style>
 </head>
-<body>
+<body onload="checkLoginStatus()">
     <div class="sidebar">
         <a href="#" onclick="openSection('FREE FIRE')">FREE FIRE</a>
         <a href="#" onclick="openSection('PUBG')">PUBG</a>
@@ -50,14 +50,26 @@
         <a href="#" onclick="goHome()">Back to Home</a>
     </div>
     <div class="main-content">
-        <div>
+        <div id="authButtons">
             <button onclick="showLogin()">Login</button>
             <button onclick="showSignup()">Sign Up</button>
         </div>
+        <button id="logoutButton" onclick="logout()" style="display:none;">Logout</button>
         <div id="store" class="store"></div>
     </div><script>
     let users = JSON.parse(localStorage.getItem("users")) || [];
     let items = [];
+    let currentUser = localStorage.getItem("currentUser");
+    
+    function checkLoginStatus() {
+        if (currentUser) {
+            document.getElementById("authButtons").style.display = "none";
+            document.getElementById("logoutButton").style.display = "block";
+            if (currentUser === "admin") {
+                showAdminPanel();
+            }
+        }
+    }
     
     function showSignup() {
         let username = prompt("Enter username:");
@@ -71,15 +83,22 @@
         let username = prompt("Enter username:");
         let password = prompt("Enter password:");
         if (username === "admin" && password === "GameMaster123!") {
-            showAdminPanel();
+            localStorage.setItem("currentUser", "admin");
+            location.reload();
             return;
         }
         let user = users.find(u => u.username === username && u.password === password);
         if (user) {
-            alert("Login successful!");
+            localStorage.setItem("currentUser", username);
+            location.reload();
         } else {
             alert("Invalid credentials!");
         }
+    }
+    
+    function logout() {
+        localStorage.removeItem("currentUser");
+        location.reload();
     }
     
     function openSection(category) {
@@ -132,8 +151,11 @@
     }
     
     function restockItem(index) {
-        items[index].stock = 5;
-        showAdminPanel();
+        let stock = parseInt(prompt("Enter stock quantity to restock:"));
+        if (!isNaN(stock) && stock > 0) {
+            items[index].stock += stock;
+            showAdminPanel();
+        }
     }
     
     function deleteItem(index) {
