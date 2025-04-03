@@ -18,11 +18,15 @@
             display: flex;
             flex-direction: column;
         }
-        .sidebar a {
+        .sidebar a, .sidebar button {
             color: white;
             margin: 10px 0;
             text-decoration: none;
             display: block;
+            background: none;
+            border: none;
+            text-align: left;
+            cursor: pointer;
         }
         .main-content {
             flex-grow: 1;
@@ -43,6 +47,9 @@
 </head>
 <body onload="checkLoginStatus()">
     <div class="sidebar">
+        <button onclick="showLogin()" id="loginButton">Login</button>
+        <button onclick="showSignup()" id="signupButton">Sign Up</button>
+        <button onclick="logout()" id="logoutButton" style="display:none;">Logout</button>
         <a href="#" onclick="openSection('FREE FIRE')">FREE FIRE</a>
         <a href="#" onclick="openSection('PUBG')">PUBG</a>
         <a href="#" onclick="openSection('MLBB')">MLBB</a>
@@ -50,25 +57,22 @@
         <a href="#" onclick="goHome()">Back to Home</a>
     </div>
     <div class="main-content">
-        <div id="authButtons">
-            <button onclick="showLogin()">Login</button>
-            <button onclick="showSignup()">Sign Up</button>
-        </div>
-        <button id="logoutButton" onclick="logout()" style="display:none;">Logout</button>
         <div id="store" class="store"></div>
     </div><script>
     let users = JSON.parse(localStorage.getItem("users")) || [];
-    let items = [];
+    let items = JSON.parse(localStorage.getItem("items")) || [];
     let currentUser = localStorage.getItem("currentUser");
     
     function checkLoginStatus() {
         if (currentUser) {
-            document.getElementById("authButtons").style.display = "none";
+            document.getElementById("loginButton").style.display = "none";
+            document.getElementById("signupButton").style.display = "none";
             document.getElementById("logoutButton").style.display = "block";
             if (currentUser === "admin") {
                 showAdminPanel();
             }
         }
+        loadItems();
     }
     
     function showSignup() {
@@ -116,8 +120,13 @@
     }
     
     function buyItem(index) {
+        if (!currentUser) {
+            alert("Please login or sign up to purchase items.");
+            return;
+        }
         if (items[index].stock > 0) {
             items[index].stock--;
+            saveItems();
             openSection(items[index].category);
         }
     }
@@ -146,6 +155,7 @@
         let stock = parseInt(prompt("Enter stock quantity:"));
         if (name && category && !isNaN(stock)) {
             items.push({ name, category, stock });
+            saveItems();
             showAdminPanel();
         }
     }
@@ -154,13 +164,26 @@
         let stock = parseInt(prompt("Enter stock quantity to restock:"));
         if (!isNaN(stock) && stock > 0) {
             items[index].stock += stock;
+            saveItems();
             showAdminPanel();
         }
     }
     
     function deleteItem(index) {
         items.splice(index, 1);
+        saveItems();
         showAdminPanel();
+    }
+    
+    function saveItems() {
+        localStorage.setItem("items", JSON.stringify(items));
+    }
+    
+    function loadItems() {
+        let savedItems = localStorage.getItem("items");
+        if (savedItems) {
+            items = JSON.parse(savedItems);
+        }
     }
 </script>
 
