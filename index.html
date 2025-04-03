@@ -110,6 +110,7 @@
     function showAdminPanel() {
         let storeDiv = document.getElementById("store");
         storeDiv.innerHTML = "<h2>Admin Panel</h2>";
+        storeDiv.innerHTML += `<button onclick="addItem()">Add Item</button>`;
         items.forEach((item, index) => {
             storeDiv.innerHTML += `
                 <div class="item">
@@ -118,6 +119,16 @@
                     <button onclick="deleteItem(${index})">Delete</button>
                 </div>`;
         });
+    }
+    
+    function addItem() {
+        let name = prompt("Enter item name:");
+        let category = prompt("Enter category (FREE FIRE, PUBG, MLBB, OTHERS):");
+        let stock = parseInt(prompt("Enter stock quantity:"));
+        if (name && category && !isNaN(stock)) {
+            items.push({ name, category, stock });
+            showAdminPanel();
+        }
     }
     
     function restockItem(index) {
