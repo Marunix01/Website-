@@ -1,195 +1,89 @@
 <!DOCTYPE html><html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Online Store</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            display: flex;
-        }
-        .sidebar {
-            width: 200px;
-            background: #333;
-            color: white;
-            padding: 10px;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }
-        .sidebar a, .sidebar button {
-            color: white;
-            margin: 10px 0;
-            text-decoration: none;
-            display: block;
-            background: none;
-            border: none;
-            text-align: left;
-            cursor: pointer;
-        }
-        .main-content {
-            flex-grow: 1;
-            padding: 20px;
-        }
-        .store {
-            margin-top: 20px;
-        }
-        .item {
-            margin: 10px;
-            padding: 10px;
-            border: 1px solid black;
-        }
-        .out-of-stock {
-            color: red;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Roll Dice or Truth & Dare</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 2em;
+      background: #f2f2f2;
+    }
+    .hidden {
+      display: none;
+    }
+    .section {
+      margin-top: 2em;
+    }
+    button, select {
+      margin: 1em;
+      padding: 0.5em 1em;
+      font-size: 1em;
+    }
+  </style>
 </head>
-<body onload="checkLoginStatus()">
-    <div class="sidebar">
-        <button onclick="showLogin()" id="loginButton">Login</button>
-        <button onclick="showSignup()" id="signupButton">Sign Up</button>
-        <button onclick="logout()" id="logoutButton" style="display:none;">Logout</button>
-        <a href="#" onclick="openSection('FREE FIRE')">FREE FIRE</a>
-        <a href="#" onclick="openSection('PUBG')">PUBG</a>
-        <a href="#" onclick="openSection('MLBB')">MLBB</a>
-        <a href="#" onclick="openSection('OTHERS')">OTHERS</a>
-        <a href="#" onclick="goHome()">Back to Home</a>
-    </div>
-    <div class="main-content">
-        <div id="store" class="store"></div>
-    </div><script>
-    let users = JSON.parse(localStorage.getItem("users")) || [];
-    let items = JSON.parse(localStorage.getItem("items")) || [];
-    let currentUser = localStorage.getItem("currentUser");
-    
-    function checkLoginStatus() {
-        if (currentUser) {
-            document.getElementById("loginButton").style.display = "none";
-            document.getElementById("signupButton").style.display = "none";
-            document.getElementById("logoutButton").style.display = "block";
-            if (currentUser === "admin") {
-                showAdminPanel();
-            }
-        }
-        loadItems();
-    }
-    
-    function showSignup() {
-        let username = prompt("Enter username:");
-        let password = prompt("Enter password:");
-        if (users.find(u => u.username === username)) {
-            alert("Username already exists! Try another.");
-            return;
-        }
-        users.push({ username, password });
-        localStorage.setItem("users", JSON.stringify(users));
-        alert("Signup successful!");
-    }
-    
-    function showLogin() {
-        let username = prompt("Enter username:");
-        let password = prompt("Enter password:");
-        if (username === "admin" && password === "GameMaster123!") {
-            localStorage.setItem("currentUser", "admin");
-            location.reload();
-            return;
-        }
-        let user = users.find(u => u.username === username && u.password === password);
-        if (user) {
-            localStorage.setItem("currentUser", username);
-            location.reload();
-        } else {
-            alert("Invalid credentials!");
-        }
-    }
-    
-    function logout() {
-        localStorage.removeItem("currentUser");
-        location.reload();
-    }
-    
-    function openSection(category) {
-        let storeDiv = document.getElementById("store");
-        storeDiv.innerHTML = "<h2>" + category + "</h2>";
-        items.forEach((item, index) => {
-            if (item.category === category) {
-                storeDiv.innerHTML += `
-                    <div class="item">
-                        <p>${item.name} - ${item.stock > 0 ? item.stock + ' available' : '<span class="out-of-stock">Out of Stock</span>'}</p>
-                        <button onclick="buyItem(${index})">Buy</button>
-                    </div>`;
-            }
-        });
-    }
-    
-    function buyItem(index) {
-        if (!currentUser) {
-            alert("Please login or sign up to purchase items.");
-            return;
-        }
-        if (items[index].stock > 0) {
-            items[index].stock--;
-            saveItems();
-            openSection(items[index].category);
-        }
-    }
-    
-    function goHome() {
-        document.getElementById("store").innerHTML = "";
-    }
-    
-    function showAdminPanel() {
-        let storeDiv = document.getElementById("store");
-        storeDiv.innerHTML = "<h2>Admin Panel</h2>";
-        storeDiv.innerHTML += `<button onclick="addItem()">Add Item</button>`;
-        items.forEach((item, index) => {
-            storeDiv.innerHTML += `
-                <div class="item">
-                    <p>${item.name} - ${item.stock > 0 ? item.stock + ' available' : '<span class="out-of-stock">Out of Stock</span>'}</p>
-                    <button onclick="restockItem(${index})">Restock</button>
-                    <button onclick="deleteItem(${index})">Delete</button>
-                </div>`;
-        });
-    }
-    
-    function addItem() {
-        let name = prompt("Enter item name:");
-        let category = prompt("Enter category (FREE FIRE, PUBG, MLBB, OTHERS):");
-        let stock = parseInt(prompt("Enter stock quantity:"));
-        if (name && category && !isNaN(stock)) {
-            items.push({ name, category, stock });
-            saveItems();
-            showAdminPanel();
-        }
-    }
-    
-    function restockItem(index) {
-        let stock = parseInt(prompt("Enter stock quantity to restock:"));
-        if (!isNaN(stock) && stock > 0) {
-            items[index].stock += stock;
-            saveItems();
-            showAdminPanel();
-        }
-    }
-    
-    function deleteItem(index) {
-        items.splice(index, 1);
-        saveItems();
-        showAdminPanel();
-    }
-    
-    function saveItems() {
-        localStorage.setItem("items", JSON.stringify(items));
-    }
-    
-    function loadItems() {
-        let savedItems = localStorage.getItem("items");
-        if (savedItems) {
-            items = JSON.parse(savedItems);
-        }
-    }
-</script>
+<body>
+  <h1>Fun Zone</h1>
+  <div>
+    <button onclick="showSection('dice')">Dice Roller</button>
+    <button onclick="showSection('truthDare')">Truth & Dare</button>
+  </div>  <!-- Dice Roller Section -->  <div id="dice" class="section">
+    <h2>Roll the Dice</h2>
+    <label for="diceCount">Choose number of dice:</label>
+    <select id="diceCount">
+      <option value="1">1</option>
+      <option value="2">2</option>
+      <option value="3">3</option>
+      <option value="4">4</option>
+    </select>
+    <br />
+    <button onclick="rollDice()">Roll</button>
+    <button onclick="rollDice()">Re-roll</button>
+    <p id="diceResult"></p>
+  </div>  <!-- Truth & Dare Section -->  <div id="truthDare" class="section hidden">
+    <h2>Truth or Dare</h2>
+    <button onclick="showTruth()">Truth</button>
+    <button onclick="showDare()">Dare</button>
+    <p id="truthDareResult"></p>
+  </div>  <script>
+    const truths = [
+      "What is your biggest fear?",
+      "Have you ever lied to your best friend?",
+      "What's a secret you never told anyone?",
+      "If you could switch lives with someone, who would it be?"
+    ];
 
-</body>
+    const dares = [
+      "Do 10 pushups!",
+      "Sing a song loudly!",
+      "Text someone you love them!",
+      "Do a silly dance for 30 seconds!"
+    ];
+
+    function showSection(section) {
+      document.getElementById("dice").classList.add("hidden");
+      document.getElementById("truthDare").classList.add("hidden");
+      document.getElementById(section).classList.remove("hidden");
+    }
+
+    function rollDice() {
+      const count = parseInt(document.getElementById("diceCount").value);
+      let results = [];
+      for (let i = 0; i < count; i++) {
+        results.push(Math.floor(Math.random() * 6) + 1);
+      }
+      document.getElementById("diceResult").textContent = "You rolled: " + results.join(", ");
+    }
+
+    function showTruth() {
+      const randomTruth = truths[Math.floor(Math.random() * truths.length)];
+      document.getElementById("truthDareResult").textContent = randomTruth;
+    }
+
+    function showDare() {
+      const randomDare = dares[Math.floor(Math.random() * dares.length)];
+      document.getElementById("truthDareResult").textContent = randomDare;
+    }
+  </script></body>
 </html>
