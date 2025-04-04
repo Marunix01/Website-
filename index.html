@@ -21,13 +21,43 @@
       padding: 0.5em 1em;
       font-size: 1em;
     }
-    .dice-result {
-      font-size: 1.5em;
-      margin-top: 1em;
-      transition: transform 0.5s;
+    .dice-container {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 20px;
+      position: relative;
     }
-    .rolling {
-      transform: rotate(720deg);
+    .dice {
+      width: 50px;
+      height: 50px;
+      animation: bounce 0.6s ease;
+    }
+    @keyframes bounce {
+      0% { transform: translateY(0) rotate(0deg); }
+      30% { transform: translateY(-20px) rotate(180deg); }
+      60% { transform: translateY(10px) rotate(270deg); }
+      100% { transform: translateY(0) rotate(360deg); }
+    }
+    .particle {
+      width: 6px;
+      height: 6px;
+      background: gold;
+      position: absolute;
+      border-radius: 50%;
+      opacity: 0;
+      animation: burst 0.6s forwards;
+    }
+    @keyframes burst {
+      0% {
+        transform: translate(0, 0) scale(1);
+        opacity: 1;
+      }
+      100% {
+        transform: translate(var(--x), var(--y)) scale(0);
+        opacity: 0;
+      }
     }
   </style>
 </head>
@@ -48,6 +78,7 @@
     <br />
     <button onclick="rollDice()">Roll</button>
     <button onclick="rollDice()">Re-roll</button>
+    <div id="diceContainer" class="dice-container"></div>
     <p id="diceResult" class="dice-result"></p>
   </div>  <!-- Truth & Dare Section -->  <div id="truthDare" class="section hidden">
     <h2>Truth or Dare</h2>
@@ -55,9 +86,18 @@
     <button onclick="showDare()">Dare</button>
     <button onclick="showRandom()">Random</button>
     <p id="truthDareResult"></p>
-  </div><audio id="rollSound" src="https://www.soundjay.com/button/sounds/button-16.mp3" preload="auto"></audio>
+  </div>  <!-- Dice Roll Sound --><audio id="rollSound" src="https://www.myinstants.com/media/sounds/dice-roll.mp3" preload="auto"></audio>
 
   <script>
+    const diceImages = {
+      1: 'https://upload.wikimedia.org/wikipedia/commons/1/1b/Dice-1-b.svg',
+      2: 'https://upload.wikimedia.org/wikipedia/commons/5/5f/Dice-2-b.svg',
+      3: 'https://upload.wikimedia.org/wikipedia/commons/b/b1/Dice-3-b.svg',
+      4: 'https://upload.wikimedia.org/wikipedia/commons/f/fd/Dice-4-b.svg',
+      5: 'https://upload.wikimedia.org/wikipedia/commons/0/08/Dice-5-b.svg',
+      6: 'https://upload.wikimedia.org/wikipedia/commons/2/26/Dice-6-b.svg'
+    };
+
     const truths = [
       "What is your biggest fear?",
       "Have you ever lied to your best friend?",
@@ -81,22 +121,46 @@
     function rollDice() {
       const count = parseInt(document.getElementById("diceCount").value);
       const resultEl = document.getElementById("diceResult");
+      const container = document.getElementById("diceContainer");
       const rollSound = document.getElementById("rollSound");
-      
+
+      container.innerHTML = '';
+      resultEl.textContent = '';
+
       rollSound.currentTime = 0;
       rollSound.play();
 
-      resultEl.classList.remove("rolling");
-      void resultEl.offsetWidth; // Trigger reflow
-      resultEl.classList.add("rolling");
+      let results = [];
+      for (let i = 0; i < count; i++) {
+        const roll = Math.floor(Math.random() * 6) + 1;
+        results.push(roll);
+
+        const img = document.createElement("img");
+        img.src = diceImages[roll];
+        img.classList.add("dice");
+
+        const wrapper = document.createElement("div");
+        wrapper.style.position = 'relative';
+        wrapper.appendChild(img);
+        container.appendChild(wrapper);
+
+        // Particle burst
+        for (let j = 0; j < 8; j++) {
+          const particle = document.createElement("div");
+          particle.classList.add("particle");
+          const angle = Math.random() * 2 * Math.PI;
+          const radius = 30 + Math.random() * 20;
+          const x = Math.cos(angle) * radius + 'px';
+          const y = Math.sin(angle) * radius + 'px';
+          particle.style.setProperty('--x', x);
+          particle.style.setProperty('--y', y);
+          wrapper.appendChild(particle);
+        }
+      }
 
       setTimeout(() => {
-        let results = [];
-        for (let i = 0; i < count; i++) {
-          results.push(Math.floor(Math.random() * 6) + 1);
-        }
         resultEl.textContent = "You rolled: " + results.join(", ");
-      }, 500);
+      }, 600);
     }
 
     function showTruth() {
