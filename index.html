@@ -2,24 +2,41 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Roll Dice or Truth & Dare</title>
+  <title>Fun Zone</title>
   <style>
     body {
       font-family: Arial, sans-serif;
       text-align: center;
       padding: 2em;
-      background: #f2f2f2;
+      background: linear-gradient(135deg, #fceabb, #f8b500);
+      color: #333;
     }
     .hidden {
       display: none;
     }
     .section {
       margin-top: 2em;
+      background: white;
+      padding: 1em;
+      border-radius: 12px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      max-width: 500px;
+      margin-left: auto;
+      margin-right: auto;
     }
     button, select {
       margin: 1em;
-      padding: 0.5em 1em;
+      padding: 0.6em 1.2em;
       font-size: 1em;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      background: #f8b500;
+      color: white;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+    button:hover {
+      background: #f59e00;
     }
     .dice-container {
       display: flex;
@@ -64,11 +81,11 @@
   </style>
 </head>
 <body>
-  <h1>Fun Zone</h1>
-  <div>
-    <button onclick="showSection('dice')">Dice Roller</button>
+  <h1>Welcome to the Fun Zone</h1>
+  <div id="startSection">
+    <button onclick="showSection('dice')">Play Dice</button>
     <button onclick="showSection('truthDare')">Truth & Dare</button>
-  </div>  <!-- Dice Roller Section -->  <div id="dice" class="section">
+  </div>  <!-- Dice Roller Section -->  <div id="dice" class="section hidden">
     <h2>Roll the Dice</h2>
     <label for="diceCount">Choose number of dice:</label>
     <select id="diceCount">
@@ -80,6 +97,7 @@
     <br />
     <button onclick="rollDice()">Roll</button>
     <button onclick="rollDice()">Re-roll</button>
+    <button onclick="goBack()">Back</button>
     <div id="diceContainer" class="dice-container"></div>
     <p id="diceResult" class="dice-result"></p>
   </div>  <!-- Truth & Dare Section -->  <div id="truthDare" class="section hidden">
@@ -87,6 +105,7 @@
     <button onclick="showTruth()">Truth</button>
     <button onclick="showDare()">Dare</button>
     <button onclick="showRandom()">Random</button>
+    <button onclick="goBack()">Back</button>
     <p id="truthDareResult"></p>
   </div>  <!-- Dice Roll Sound --><audio id="rollSound" src="https://www.myinstants.com/media/sounds/dice-roll.mp3" preload="auto"></audio>
 
@@ -101,23 +120,42 @@
     };
 
     const truths = [
-      "What is your biggest fear?",
-      "Have you ever lied to your best friend?",
-      "What's a secret you never told anyone?",
-      "If you could switch lives with someone, who would it be?"
+      "What is your favorite food?",
+      "Have you ever told a lie today?",
+      "What’s something silly you’re afraid of?",
+      "What's your favorite TV show?",
+      "Do you sing in the shower?",
+      "Have you ever eaten something off the floor?",
+      "What's the last photo you took?",
+      "If animals could talk, which would be the rudest?",
+      "What's your guilty pleasure?",
+      "What's a weird food combination you love?"
     ];
 
     const dares = [
-      "Do 10 pushups!",
-      "Sing a song loudly!",
-      "Text someone you love them!",
-      "Do a silly dance for 30 seconds!"
+      "Do 10 jumping jacks!",
+      "Try to lick your elbow!",
+      "Do a funny face selfie!",
+      "Spin around 5 times and walk straight!",
+      "Balance a book on your head for 10 seconds!",
+      "Talk in a cartoon voice for a minute!",
+      "Pretend to be a chicken!",
+      "Act like your favorite animal!",
+      "Draw something with your eyes closed!",
+      "Send a silly meme to a friend!"
     ];
 
     function showSection(section) {
+      document.getElementById("startSection").classList.add("hidden");
       document.getElementById("dice").classList.add("hidden");
       document.getElementById("truthDare").classList.add("hidden");
       document.getElementById(section).classList.remove("hidden");
+    }
+
+    function goBack() {
+      document.getElementById("dice").classList.add("hidden");
+      document.getElementById("truthDare").classList.add("hidden");
+      document.getElementById("startSection").classList.remove("hidden");
     }
 
     function rollDice() {
