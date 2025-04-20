@@ -1,233 +1,135 @@
-<!DOCTYPE html><html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Fun Zone</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      text-align: center;
-      padding: 2em;
-      background: linear-gradient(135deg, #fceabb, #f8b500);
-      color: #333;
-    }
-    .hidden {
-      display: none;
-    }
-    .section {
-      margin-top: 2em;
-      background: white;
-      padding: 1em;
-      border-radius: 12px;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-      max-width: 500px;
-      margin-left: auto;
-      margin-right: auto;
-    }
-    button, select {
-      margin: 1em;
-      padding: 0.6em 1.2em;
-      font-size: 1em;
-      border-radius: 8px;
-      border: none;
-      cursor: pointer;
-      background: #f8b500;
-      color: white;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-    }
-    button:hover {
-      background: #f59e00;
-    }
-    .dice-container {
-      display: flex;
-      justify-content: center;
-      flex-wrap: wrap;
-      gap: 10px;
-      margin-top: 20px;
-      position: relative;
-    }
-    .dice {
-      width: 50px;
-      height: 50px;
-    }
-    .rolling {
-      animation: rolling 0.6s ease;
-    }
-    @keyframes rolling {
-      0%, 100% { transform: translateY(0) rotate(0deg); }
-      25% { transform: translateY(-10px) rotate(90deg); }
-      50% { transform: translateY(5px) rotate(180deg); }
-      75% { transform: translateY(-5px) rotate(270deg); }
-    }
-    .particle {
-      width: 6px;
-      height: 6px;
-      background: gold;
-      position: absolute;
-      border-radius: 50%;
-      opacity: 0;
-      animation: burst 0.6s forwards;
-    }
-    @keyframes burst {
-      0% {
-        transform: translate(0, 0) scale(1);
-        opacity: 1;
-      }
-      100% {
-        transform: translate(var(--x), var(--y)) scale(0);
-        opacity: 0;
-      }
-    }
-  </style>
-</head>
-<body>
-  <h1>Welcome to the Fun Zone</h1>
-  <div id="startSection">
-    <button onclick="showSection('dice')">Play Dice</button>
-    <button onclick="showSection('truthDare')">Truth & Dare</button>
-  </div>  <!-- Dice Roller Section -->  <div id="dice" class="section hidden">
-    <h2>Roll the Dice</h2>
-    <label for="diceCount">Choose number of dice:</label>
-    <select id="diceCount">
-      <option value="1">1</option>
-      <option value="2">2</option>
-      <option value="3">3</option>
-      <option value="4">4</option>
-    </select>
-    <br />
-    <button onclick="rollDice()">Roll</button>
-    <button onclick="rollDice()">Re-roll</button>
-    <button onclick="goBack()">Back</button>
-    <div id="diceContainer" class="dice-container"></div>
-    <p id="diceResult" class="dice-result"></p>
-  </div>  <!-- Truth & Dare Section -->  <div id="truthDare" class="section hidden">
-    <h2>Truth or Dare</h2>
-    <button onclick="showTruth()">Truth</button>
-    <button onclick="showDare()">Dare</button>
-    <button onclick="showRandom()">Random</button>
-    <button onclick="goBack()">Back</button>
-    <p id="truthDareResult"></p>
-  </div>  <!-- Dice Roll Sound --><audio id="rollSound" src="https://www.myinstants.com/media/sounds/dice-roll.mp3" preload="auto"></audio>
+import React from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card, CardContent } from "@/components/ui/card";
+import { ShoppingCart, Search, User, PackageSearch, LayoutDashboard } from "lucide-react";
 
-  <script>
-    const diceImages = {
-      1: 'https://upload.wikimedia.org/wikipedia/commons/1/1b/Dice-1-b.svg',
-      2: 'https://upload.wikimedia.org/wikipedia/commons/5/5f/Dice-2-b.svg',
-      3: 'https://upload.wikimedia.org/wikipedia/commons/b/b1/Dice-3-b.svg',
-      4: 'https://upload.wikimedia.org/wikipedia/commons/f/fd/Dice-4-b.svg',
-      5: 'https://upload.wikimedia.org/wikipedia/commons/0/08/Dice-5-b.svg',
-      6: 'https://upload.wikimedia.org/wikipedia/commons/2/26/Dice-6-b.svg'
-    };
+const items = [
+  {
+    id: 1,
+    name: "Product One",
+    price: "$19.99",
+    image: "https://via.placeholder.com/150",
+    description: "Short description of product one."
+  },
+  {
+    id: 2,
+    name: "Product Two",
+    price: "$29.99",
+    image: "https://via.placeholder.com/150",
+    description: "Short description of product two."
+  },
+  {
+    id: 3,
+    name: "Product Three",
+    price: "$39.99",
+    image: "https://via.placeholder.com/150",
+    description: "Short description of product three."
+  }
+];
 
-    const truths = [
-      "What is your favorite food?",
-      "Have you ever told a lie today?",
-      "What’s something silly you’re afraid of?",
-      "What's your favorite TV show?",
-      "Do you sing in the shower?",
-      "Have you ever eaten something off the floor?",
-      "What's the last photo you took?",
-      "If animals could talk, which would be the rudest?",
-      "What's your guilty pleasure?",
-      "What's a weird food combination you love?"
-    ];
+export default function EcommercePage() {
+  return (
+    <div className="p-4 max-w-6xl mx-auto">
+      <header className="flex justify-between items-center py-4 border-b">
+        <h1 className="text-3xl font-bold">My Shop</h1>
+        <div className="flex gap-2 items-center">
+          <Input placeholder="Search products..." className="w-64" />
+          <Button variant="outline">
+            <Search className="h-4 w-4 mr-2" /> Search
+          </Button>
+        </div>
+        <div className="flex gap-4 items-center">
+          <Button variant="ghost">
+            <User className="h-5 w-5" />
+          </Button>
+          <Button variant="ghost">
+            <ShoppingCart className="h-5 w-5" />
+          </Button>
+          <Button variant="ghost">
+            <LayoutDashboard className="h-5 w-5" />
+          </Button>
+        </div>
+      </header>
 
-    const dares = [
-      "Do 10 jumping jacks!",
-      "Try to lick your elbow!",
-      "Do a funny face selfie!",
-      "Spin around 5 times and walk straight!",
-      "Balance a book on your head for 10 seconds!",
-      "Talk in a cartoon voice for a minute!",
-      "Pretend to be a chicken!",
-      "Act like your favorite animal!",
-      "Draw something with your eyes closed!",
-      "Send a silly meme to a friend!"
-    ];
+      <section className="flex justify-between items-center mt-6">
+        <div className="flex gap-4">
+          <select className="p-2 border rounded-md">
+            <option value="">Sort by</option>
+            <option value="price-low">Price: Low to High</option>
+            <option value="price-high">Price: High to Low</option>
+          </select>
+          <select className="p-2 border rounded-md">
+            <option value="">Filter by</option>
+            <option value="category-1">Category 1</option>
+            <option value="category-2">Category 2</option>
+          </select>
+        </div>
+        <Button className="text-sm">Manage Products</Button>
+      </section>
 
-    function showSection(section) {
-      document.getElementById("startSection").classList.add("hidden");
-      document.getElementById("dice").classList.add("hidden");
-      document.getElementById("truthDare").classList.add("hidden");
-      document.getElementById(section).classList.remove("hidden");
-    }
+      <main className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
+        {items.map((item) => (
+          <Card key={item.id} className="rounded-2xl shadow-md">
+            <img src={item.image} alt={item.name} className="rounded-t-2xl" />
+            <CardContent className="p-4">
+              <h2 className="text-xl font-semibold mb-1">{item.name}</h2>
+              <p className="text-muted-foreground mb-2">{item.description}</p>
+              <p className="text-lg font-bold mb-4">{item.price}</p>
+              <Button className="w-full">Add to Cart</Button>
+            </CardContent>
+          </Card>
+        ))}
+      </main>
 
-    function goBack() {
-      document.getElementById("dice").classList.add("hidden");
-      document.getElementById("truthDare").classList.add("hidden");
-      document.getElementById("startSection").classList.remove("hidden");
-    }
+      <section className="mt-12">
+        <h2 className="text-2xl font-bold mb-4">Order Tracking</h2>
+        <div className="flex gap-4 items-center">
+          <Input placeholder="Enter your order ID..." className="w-64" />
+          <Button>
+            <PackageSearch className="h-4 w-4 mr-2" /> Track Order
+          </Button>
+        </div>
+      </section>
 
-    function rollDice() {
-      const count = parseInt(document.getElementById("diceCount").value);
-      const resultEl = document.getElementById("diceResult");
-      const container = document.getElementById("diceContainer");
-      const rollSound = document.getElementById("rollSound");
+      <section className="mt-12">
+        <h2 className="text-2xl font-bold mb-4">User Login</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="p-4 border rounded-md">
+            <h3 className="text-lg font-semibold mb-2">Login</h3>
+            <Input placeholder="Email" className="mb-2" />
+            <Input type="password" placeholder="Password" className="mb-2" />
+            <Button className="w-full">Login</Button>
+          </div>
+          <div className="p-4 border rounded-md">
+            <h3 className="text-lg font-semibold mb-2">Register</h3>
+            <Input placeholder="Name" className="mb-2" />
+            <Input placeholder="Email" className="mb-2" />
+            <Input type="password" placeholder="Password" className="mb-2" />
+            <Button className="w-full">Register</Button>
+          </div>
+        </div>
+      </section>
 
-      container.innerHTML = '';
-      resultEl.textContent = '';
+      <section className="mt-12">
+        <h2 className="text-2xl font-bold mb-4">Admin Dashboard</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="p-4 border rounded-md">
+            <h3 className="text-lg font-semibold mb-2">Inventory Control</h3>
+            <p className="text-muted-foreground text-sm mb-2">Add, edit, or remove products from your store.</p>
+            <Button className="w-full">Go to Inventory</Button>
+          </div>
+          <div className="p-4 border rounded-md">
+            <h3 className="text-lg font-semibold mb-2">Orders Overview</h3>
+            <p className="text-muted-foreground text-sm mb-2">View, filter, and update customer orders.</p>
+            <Button className="w-full">View Orders</Button>
+          </div>
+        </div>
+      </section>
 
-      rollSound.currentTime = 0;
-      rollSound.play();
-
-      let results = [];
-
-      for (let i = 0; i < count; i++) {
-        const wrapper = document.createElement("div");
-        wrapper.style.position = 'relative';
-
-        const img = document.createElement("img");
-        img.classList.add("dice", "rolling");
-        wrapper.appendChild(img);
-        container.appendChild(wrapper);
-
-        let rollInterval = setInterval(() => {
-          const randomFace = Math.floor(Math.random() * 6) + 1;
-          img.src = diceImages[randomFace];
-        }, 100);
-
-        setTimeout(() => {
-          clearInterval(rollInterval);
-          const roll = Math.floor(Math.random() * 6) + 1;
-          img.src = diceImages[roll];
-          results.push(roll);
-
-          // Particle burst
-          for (let j = 0; j < 8; j++) {
-            const particle = document.createElement("div");
-            particle.classList.add("particle");
-            const angle = Math.random() * 2 * Math.PI;
-            const radius = 30 + Math.random() * 20;
-            const x = Math.cos(angle) * radius + 'px';
-            const y = Math.sin(angle) * radius + 'px';
-            particle.style.setProperty('--x', x);
-            particle.style.setProperty('--y', y);
-            wrapper.appendChild(particle);
-          }
-
-          if (results.length === count) {
-            resultEl.textContent = "You rolled: " + results.join(", ");
-          }
-        }, 1000);
-      }
-    }
-
-    function showTruth() {
-      const randomTruth = truths[Math.floor(Math.random() * truths.length)];
-      document.getElementById("truthDareResult").textContent = randomTruth;
-    }
-
-    function showDare() {
-      const randomDare = dares[Math.floor(Math.random() * dares.length)];
-      document.getElementById("truthDareResult").textContent = randomDare;
-    }
-
-    function showRandom() {
-      if (Math.random() < 0.5) {
-        showTruth();
-      } else {
-        showDare();
-      }
-    }
-  </script></body>
-</html>
+      <footer className="mt-10 text-center text-muted-foreground">
+        &copy; {new Date().getFullYear()} My Shop. All rights reserved.
+      </footer>
+    </div>
+  );
+}
